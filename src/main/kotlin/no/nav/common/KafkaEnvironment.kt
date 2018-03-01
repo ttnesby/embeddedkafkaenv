@@ -22,15 +22,39 @@ import java.util.*
  */
 object KafkaEnvironment {
 
+    data class ServerPark(
+            val zookeeper: ZKServer,
+            val brokers: List<KBServer>,
+            val schemaregistry: SRServer,
+            val rest: KRServer
+    )
+
     /**
      * Start the kafka environment
-     * @param noOfBrokers no of brokers to spin up
-     * @param topics a list of topics to create
+     * @param noOfBrokers no of brokers to spin up, default one
+     * @param topics a list of topics to create - default empty
+     * @param withSchemaRegistry include schema registry - default true
+     * @param withRest include rest server - default false
      * @return a map of urls - key values: 'broker', 'schema', 'rest'
      *
      * Observe that the url for multiple brokers will be a string like '<url broker 1>, <url broker 2>, ...'
      */
-    fun start(noOfBrokers: Int = 1, topics: List<String> = emptyList()) : Map<String,String> {
+    fun start(
+            noOfBrokers: Int = 1,
+            topics: List<String> = emptyList(),
+            withSchemaRegistry: Boolean = true,
+            withRest: Boolean = false) : Map<String,String> {
+
+        //allocate enough available port
+        val noOfPorts = 1 + noOfBrokers + listOf(withSchemaRegistry, withRest).filter { true }.size
+        val portsIter = (1..noOfPorts).map { getAvailablePort() }.iterator()
+
+        val serverPark = ServerPark(
+                ZKServer(portsIter.next()),
+                (1..noOfBrokers).map { KBServer(portsIter.next(),it-1,noOfBrokers) },
+                if (withSchemaRegistry) SRServer(portsIter.next()) else SRServer(0),
+                if (withRest) KRServer(portsIter.next()) else KRServer(0)
+        )
 
         ZKServer.onReceive(ZKStart)
         KBServer.onReceive(KBStart(noOfBrokers))

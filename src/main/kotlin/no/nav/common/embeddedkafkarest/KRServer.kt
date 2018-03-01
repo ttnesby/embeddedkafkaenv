@@ -7,7 +7,7 @@ import no.nav.common.embeddedschemaregistry.SRServer
 import no.nav.common.embeddedutils.*
 import java.util.*
 
-class KRServer private constructor(override val port: Int) : ServerBase() {
+class KRServer(override val port: Int) : ServerBase() {
 
     // see link below for starting up embeddedkafkarest
     // https://github.com/confluentinc/kafka-rest/blob/4.0.x/src/main/java/io/confluent/kafkarest/KafkaRestMain.java

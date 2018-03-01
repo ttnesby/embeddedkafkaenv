@@ -8,7 +8,7 @@ import org.apache.zookeeper.server.ZooKeeperServer
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog
 import java.io.File
 
-class ZKServer private constructor(override val port: Int) : ServerBase() {
+class ZKServer(override val port: Int) : ServerBase() {
 
     // see link below for starting up embeddedzookeeper...
     // https://github.com/apache/zookeeper/blob/e0af6ed7598fc4555d7625ddc8efd86e2281babf/src/java/main/org/apache/zookeeper/server/ZooKeeperServerMain.java

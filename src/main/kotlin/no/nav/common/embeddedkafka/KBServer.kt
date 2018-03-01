@@ -12,7 +12,7 @@ import scala.Option
 import java.io.File
 import java.util.*
 
-class KBServer private constructor(override val port: Int, id: Int, private val noPartitions: Int) : ServerBase() {
+class KBServer(override val port: Int, id: Int, private val noPartitions: Int) : ServerBase() {
 
     // see link below for starting up a embeddedkafka broker
     // https://insight.io/github.com/apache/kafka/blob/1.0/core/src/main/scala/kafka/server/KafkaServerStartable.scala
