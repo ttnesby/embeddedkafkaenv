@@ -44,6 +44,10 @@ class KafkaEnvironment(val noOfBrokers: Int = 1,
             val rest: ServerBase
     )
 
+    // in case of strange config, zero brokers and require schema reg or rest
+    private val reqNoOfBrokers = if (noOfBrokers < 1 && (withSchemaRegistry || withRest)) 1 else noOfBrokers
+
+    // in case start of environment will be manually triggered
     private var topicsCreated = false
 
     private val zkDataDir = File(System.getProperty("java.io.tmpdir"), "inmzookeeper").apply {
@@ -60,7 +64,7 @@ class KafkaEnvironment(val noOfBrokers: Int = 1,
     }.iterator()
 
     //allocate enough available ports
-    private val noOfPorts = 1 + noOfBrokers +
+    private val noOfPorts = 1 + reqNoOfBrokers +
             listOf((withSchemaRegistry || withRest), withRest).filter { it == true }.size
 
     private val portsIter = (1..noOfPorts).map { getAvailablePort() }.iterator()
@@ -71,7 +75,7 @@ class KafkaEnvironment(val noOfBrokers: Int = 1,
     // initialize servers and start, creation of topics
     init {
         val zk = ZKServer(portsIter.next(), zkDataDir)
-        val kBrokers = (0 until noOfBrokers).map {
+        val kBrokers = (0 until reqNoOfBrokers).map {
             KBServer(portsIter.next(),it, noOfBrokers, kbLDirIter.next(), zk.url)
         }
         brokersURL = kBrokers.map { it.url }

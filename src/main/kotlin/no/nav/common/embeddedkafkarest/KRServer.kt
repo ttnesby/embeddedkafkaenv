@@ -21,11 +21,12 @@ class KRServer(
     private class KRS(url: String, zkURL: String, kbURL: String, srURL: String) {
 
         val krServer = KafkaRestApplication(Properties().apply {
+            set(KafkaRestConfig.ID_CONFIG, "EMBREST")
             set(KafkaRestConfig.LISTENERS_CONFIG, url)
             set(KafkaRestConfig.ZOOKEEPER_CONNECT_CONFIG, zkURL)
             set(KafkaRestConfig.BOOTSTRAP_SERVERS_CONFIG, kbURL)
             set(KafkaRestConfig.SCHEMA_REGISTRY_URL_CONFIG, srURL)
-            set(KafkaRestConfig.PRODUCER_THREADS_CONFIG, 3)
+            set(KafkaRestConfig.PRODUCER_THREADS_CONFIG, 3) //5
         })
     }
 
