@@ -12,6 +12,7 @@ import org.jetbrains.spek.api.dsl.xit
 
 object KafkaEnvironmentSpec : Spek({
 
+    /*
     val sessTimeout = 1500
     val connTimeout = 500
     val srTopic = 1
@@ -173,5 +174,5 @@ object KafkaEnvironmentSpec : Spek({
             KafkaEnvironment.stop()
         }
     }
-
+*/
 })

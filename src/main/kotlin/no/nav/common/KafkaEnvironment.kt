@@ -9,72 +9,120 @@ import no.nav.common.embeddedkafkarest.KRServer
 import no.nav.common.embeddedschemaregistry.SRServer
 import no.nav.common.embeddedutils.*
 import no.nav.common.embeddedzookeeper.ZKServer
+import org.apache.commons.io.FileUtils
+import java.io.File
+import java.io.IOException
 import java.util.*
 
 /**
  * A in-memory kafka environment consisting of
  * - 1 zookeeper
- * - configurable no of kafka brokers
- * - 1 schema registry
- * - 1 rest gateway
+ * @param noOfBrokers no of brokers to spin up, default one
+ * @param topics a list of topics to create at environment startup - default empty
+ * @param withSchemaRegistry optional schema registry - default false
+ * @param withRest optional rest server - default false
+ * @param autoStart start servers immediately - default false
  *
- * Also adding configurable topics to the cluster
- */
-object KafkaEnvironment {
+ * withRest is true will automatically include schema registry
+ *
+ * A [ServerPark] property is available for custom management of servers
+ * A [brokersURL] property is available in case of multiple brokers
+ *
+ * Environment creation will start servers and create topics
+ *
+*/
+class KafkaEnvironment(val noOfBrokers: Int = 1,
+                       private val topics: List<String> = emptyList(),
+                       withSchemaRegistry: Boolean = false,
+                       withRest: Boolean = false,
+                       autoStart: Boolean = false) {
 
     data class ServerPark(
-            val zookeeper: ZKServer,
-            val brokers: List<KBServer>,
-            val schemaregistry: SRServer,
-            val rest: KRServer
+            val zookeeper: ServerBase,
+            val brokers: List<ServerBase>,
+            val schemaregistry: ServerBase,
+            val rest: ServerBase
     )
 
-    /**
-     * Start the kafka environment
-     * @param noOfBrokers no of brokers to spin up, default one
-     * @param topics a list of topics to create - default empty
-     * @param withSchemaRegistry include schema registry - default true
-     * @param withRest include rest server - default false
-     * @return a map of urls - key values: 'broker', 'schema', 'rest'
-     *
-     * Observe that the url for multiple brokers will be a string like '<url broker 1>, <url broker 2>, ...'
-     */
-    fun start(
-            noOfBrokers: Int = 1,
-            topics: List<String> = emptyList(),
-            withSchemaRegistry: Boolean = true,
-            withRest: Boolean = false) : Map<String,String> {
+    private var topicsCreated = false
 
-        //allocate enough available port
-        val noOfPorts = 1 + noOfBrokers + listOf(withSchemaRegistry, withRest).filter { true }.size
-        val portsIter = (1..noOfPorts).map { getAvailablePort() }.iterator()
+    private val zkDataDir = File(System.getProperty("java.io.tmpdir"), "inmzookeeper").apply {
+        // in case of fatal failure and no deletion in previous run
+        try { FileUtils.deleteDirectory(this) } catch (e: IOException) {/* tried at least */}
+    }
 
-        val serverPark = ServerPark(
-                ZKServer(portsIter.next()),
-                (1..noOfBrokers).map { KBServer(portsIter.next(),it-1,noOfBrokers) },
-                if (withSchemaRegistry) SRServer(portsIter.next()) else SRServer(0),
-                if (withRest) KRServer(portsIter.next()) else KRServer(0)
-        )
+    private val kbLDirRoot =  File(System.getProperty("java.io.tmpdir"),"inmkafkabroker").apply {
+        // in case of fatal failure and no deletion in previous run
+        try { FileUtils.deleteDirectory(this) } catch (e: IOException) {/* tried at least */}
+    }
+    private val kbLDirIter = (0 until noOfBrokers).map {
+        File(System.getProperty("java.io.tmpdir"),"inmkafkabroker/ID$it${UUID.randomUUID()}")
+    }.iterator()
 
-        ZKServer.onReceive(ZKStart)
-        KBServer.onReceive(KBStart(noOfBrokers))
-        SRServer.onReceive(SRStart)
-        KRServer.onReceive(KRStart)
+    //allocate enough available ports
+    private val noOfPorts = 1 + noOfBrokers +
+            listOf((withSchemaRegistry || withRest), withRest).filter { it == true }.size
 
-        if (!topics.isEmpty()) createTopics(topics, noOfBrokers)
+    private val portsIter = (1..noOfPorts).map { getAvailablePort() }.iterator()
 
-        return mapOf("broker" to KBServer.getUrl(),"schema" to SRServer.getUrl(), "rest" to KRServer.getUrl())
+    val serverPark: ServerPark
+    val brokersURL: String
+
+    // initialize servers and start, creation of topics
+    init {
+        val zk = ZKServer(portsIter.next(), zkDataDir)
+        val kBrokers = (0 until noOfBrokers).map {
+            KBServer(portsIter.next(),it, noOfBrokers, kbLDirIter.next(), zk.url)
+        }
+        brokersURL = kBrokers.map { it.url }
+                .foldRight("",{ u, acc -> if (acc.isEmpty()) u else "$u,$acc" })
+
+        val sr = if (withSchemaRegistry || withRest) SRServer(portsIter.next(), zk.url) else EmptyShellServer()
+        val r = if (withRest) KRServer(portsIter.next(), zk.url, brokersURL, sr.url) else EmptyShellServer()
+
+        serverPark = ServerPark(zk, kBrokers, sr, r)
+
+        if (autoStart) {
+            serverPark.apply {
+                zookeeper.start()
+                brokers.forEach { it.start() }
+                schemaregistry.start()
+                rest.start()
+            }
+            createTopics(topics)
+        }
     }
 
     /**
-     * Stop the kafka environment - all topics and events will be deleted
+     * Start the kafka environment
      */
-    fun stop() {
+    fun start() {
+        serverPark.apply {
+            zookeeper.start()
+            brokers.forEach { it.start() }
+            schemaregistry.start()
+            rest.start()
+        }
+        createTopics(topics)
+    }
 
-        KRServer.onReceive(KRStop)
-        SRServer.onReceive(SRStop)
-        KBServer.onReceive(KBStop)
-        ZKServer.onReceive(ZKStop)
+    /**
+     * Stop the kafka environment
+     */
+    fun stop() = serverPark.apply {
+        rest.stop()
+        schemaregistry.stop()
+        brokers.forEach { it.stop() }
+        zookeeper.stop()
+    }
+
+    /**
+     * Tear down the kafka environment, removing all data created in environment session
+     */
+    fun tearDown() {
+        stop()
+        try { FileUtils.deleteDirectory(zkDataDir) } catch (e: IOException) {/* tried at least */}
+        try { FileUtils.deleteDirectory(kbLDirRoot) }catch (e: IOException) {/* tried at least */}
     }
 
     // see the following links for creating topic
@@ -82,12 +130,20 @@ object KafkaEnvironment {
     // https://insight.io/github.com/apache/kafka/blob/1.0/core/src/main/scala/kafka/utils/ZkUtils.scala
     // https://insight.io/github.com/apache/kafka/blob/1.0/core/src/main/scala/kafka/admin/AdminUtils.scala
 
-    private fun createTopics(topics: List<String>, noPartitions: Int) {
+    private fun createTopics(topics: List<String>) {
+
+        if (topicsCreated || topics.isEmpty()) return
+
+        if (!topicsCreated && serverPark.brokers.isEmpty()) {
+            topicsCreated = true
+            return
+        }
 
         val sessTimeout = 1500
         val connTimeout = 500
+        val noPartitions = serverPark.brokers.size
 
-        val zkUtils =  ZkUtils.apply(ZKServer.getUrl(), sessTimeout, connTimeout, false)
+        val zkUtils =  ZkUtils.apply(serverPark.zookeeper.url, sessTimeout, connTimeout, false)
 
         topics.forEach {
 
@@ -99,7 +155,7 @@ object KafkaEnvironment {
                             "--if-not-exists",
                             "--partitions",noPartitions.toString(),
                             "--replication-factor",1.toString(),
-                            "--zookeeper",ZKServer.getUrl()
+                            "--zookeeper",serverPark.zookeeper.url
                     )
             )
             val config = Properties() // no advanced config of topic...
@@ -111,6 +167,6 @@ object KafkaEnvironment {
         }
 
         zkUtils.close()
+        topicsCreated = true
     }
-
 }
