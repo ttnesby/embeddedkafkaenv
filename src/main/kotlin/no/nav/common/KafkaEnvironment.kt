@@ -23,20 +23,26 @@ import java.util.*
  * @param withRest optional rest server - default false
  * @param autoStart start servers immediately - default false
  *
- * withRest is true will automatically include schema registry
+ * withRest as true includes automatically schema registry
+ * schema registry includes automatically at least one broker
+ *
+ * No topics are created if only zookeeper is requested
  *
  * A [ServerPark] property is available for custom management of servers
- * A [brokersURL] property is available in case of multiple brokers
- *
- * Environment creation will start servers and create topics
+ * A [brokersURL] property is available, expedient when multiple brokers
  *
 */
 class KafkaEnvironment(val noOfBrokers: Int = 1,
-                       private val topics: List<String> = emptyList(),
+                       val topics: List<String> = emptyList(),
                        withSchemaRegistry: Boolean = false,
                        withRest: Boolean = false,
                        autoStart: Boolean = false) {
 
+    /**
+     * A server park of the configured kafka environment
+     * Each server has basic properties (url, host, port)
+     * and start/stop methods
+     */
     data class ServerPark(
             val zookeeper: ServerBase,
             val brokers: List<ServerBase>,
@@ -44,10 +50,14 @@ class KafkaEnvironment(val noOfBrokers: Int = 1,
             val rest: ServerBase
     )
 
-    // in case of strange config, zero brokers and require schema reg or rest
-    private val reqNoOfBrokers = if (noOfBrokers < 1 && (withSchemaRegistry || withRest)) 1 else noOfBrokers
+    // in case of strange config
+    private val reqNoOfBrokers = when {
+        (noOfBrokers < 1 && (withSchemaRegistry || withRest)) -> 1
+        (noOfBrokers < 0 && !(withSchemaRegistry || withRest)) -> 0
+        else -> noOfBrokers
+    }
 
-    // in case start of environment will be manually triggered
+    // in case of start of environment will be manually triggered later on
     private var topicsCreated = false
 
     private val zkDataDir = File(System.getProperty("java.io.tmpdir"), "inmzookeeper").apply {
@@ -59,7 +69,7 @@ class KafkaEnvironment(val noOfBrokers: Int = 1,
         // in case of fatal failure and no deletion in previous run
         try { FileUtils.deleteDirectory(this) } catch (e: IOException) {/* tried at least */}
     }
-    private val kbLDirIter = (0 until noOfBrokers).map {
+    private val kbLDirIter = (0 until reqNoOfBrokers).map {
         File(System.getProperty("java.io.tmpdir"),"inmkafkabroker/ID$it${UUID.randomUUID()}")
     }.iterator()
 
@@ -76,7 +86,7 @@ class KafkaEnvironment(val noOfBrokers: Int = 1,
     init {
         val zk = ZKServer(portsIter.next(), zkDataDir)
         val kBrokers = (0 until reqNoOfBrokers).map {
-            KBServer(portsIter.next(),it, noOfBrokers, kbLDirIter.next(), zk.url)
+            KBServer(portsIter.next(),it, reqNoOfBrokers, kbLDirIter.next(), zk.url)
         }
         brokersURL = kBrokers.map { it.url }
                 .foldRight("",{ u, acc -> if (acc.isEmpty()) u else "$u,$acc" })
