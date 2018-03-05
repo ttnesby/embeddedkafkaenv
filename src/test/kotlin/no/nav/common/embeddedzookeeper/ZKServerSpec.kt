@@ -1,7 +1,7 @@
 package no.nav.common.embeddedzookeeper
 
 import no.nav.common.KafkaEnvironment
-import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.shouldBeEqualTo
 import org.apache.zookeeper.client.FourLetterWordMain
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.context
@@ -29,7 +29,7 @@ object ZKServerSpec : Spek({
                 FourLetterWordMain.send4LetterWord(
                         kEnv.serverPark.zookeeper.host,
                         kEnv.serverPark.zookeeper.port,
-                        "ruok") `should be equal to` "imok\n"
+                        "ruok") shouldBeEqualTo "imok\n"
             }
 
             it("should have no outstanding requests - command reqs with response empty string") {
@@ -37,7 +37,7 @@ object ZKServerSpec : Spek({
                 FourLetterWordMain.send4LetterWord(
                         kEnv.serverPark.zookeeper.host,
                         kEnv.serverPark.zookeeper.port,
-                        "reqs") `should be equal to` ""
+                        "reqs") shouldBeEqualTo ""
             }
 
             afterGroup {
@@ -56,7 +56,7 @@ object ZKServerSpec : Spek({
                 FourLetterWordMain.send4LetterWord(
                         kEnv.serverPark.zookeeper.host,
                         kEnv.serverPark.zookeeper.port,
-                        "ruok") `should be equal to` "imok\n"
+                        "ruok") shouldBeEqualTo "imok\n"
 
             }
 
@@ -65,7 +65,7 @@ object ZKServerSpec : Spek({
                 FourLetterWordMain.send4LetterWord(
                         kEnv.serverPark.zookeeper.host,
                         kEnv.serverPark.zookeeper.port,
-                        "reqs") `should be equal to` ""
+                        "reqs") shouldBeEqualTo ""
 
             }
 

@@ -2,7 +2,7 @@ package no.nav.common.embeddedkafka
 
 import kafka.utils.ZkUtils
 import no.nav.common.KafkaEnvironment
-import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.shouldEqualTo
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.context
 import org.jetbrains.spek.api.dsl.describe
@@ -28,20 +28,20 @@ object KBServerSpec : Spek({
             it("should have $b broker(s)") {
 
                 ZkUtils.apply(kEnv.serverPark.zookeeper.url, sessTimeout, connTimeout, false).run {
-                    val nBroker = allBrokersInCluster.size()
+                    val n = allBrokersInCluster.size()
                     close()
-                    nBroker
-                } `should be equal to` b
+                    n
+                } shouldEqualTo b
 
             }
 
             it("should not be any topics available") {
 
                 ZkUtils.apply(kEnv.serverPark.zookeeper.url, sessTimeout, connTimeout, false).run {
-                    val nTopics = allTopics.size()
+                    val n = allTopics.size()
                     close()
-                    nTopics
-                } `should be equal to` 0
+                    n
+                } shouldEqualTo 0
             }
 
             afterGroup {
@@ -61,20 +61,20 @@ object KBServerSpec : Spek({
             it("should have $b broker(s)") {
 
                 ZkUtils.apply(kEnv.serverPark.zookeeper.url, sessTimeout, connTimeout, false).run {
-                    val nBroker = allBrokersInCluster.size()
+                    val n = allBrokersInCluster.size()
                     close()
-                    nBroker
-                } `should be equal to` b
+                    n
+                } shouldEqualTo b
 
             }
 
             it("should not be any topics available") {
 
                 ZkUtils.apply(kEnv.serverPark.zookeeper.url, sessTimeout, connTimeout, false).run {
-                    val nTopics = allTopics.size()
+                    val n = allTopics.size()
                     close()
-                    nTopics
-                } `should be equal to` 0
+                    n
+                } shouldEqualTo 0
             }
 
             afterGroup {
@@ -94,20 +94,20 @@ object KBServerSpec : Spek({
             it("should have $b broker(s)") {
 
                 ZkUtils.apply(kEnv.serverPark.zookeeper.url, sessTimeout, connTimeout, false).run {
-                    val nBroker = allBrokersInCluster.size()
+                    val n = allBrokersInCluster.size()
                     close()
-                    nBroker
-                } `should be equal to` b
+                    n
+                } shouldEqualTo b
 
             }
 
             it("should not be any topics available") {
 
                 ZkUtils.apply(kEnv.serverPark.zookeeper.url, sessTimeout, connTimeout, false).run {
-                    val nTopics = allTopics.size()
+                    val n = allTopics.size()
                     close()
-                    nTopics
-                } `should be equal to` 0
+                    n
+                } shouldEqualTo 0
             }
 
             afterGroup {
@@ -121,26 +121,25 @@ object KBServerSpec : Spek({
 
             beforeGroup {
                 kEnv.serverPark.brokers.forEach { it.stop() }
-
             }
 
             it("should have $b broker(s)") {
 
                 ZkUtils.apply(kEnv.serverPark.zookeeper.url, sessTimeout, connTimeout, false).run {
-                    val nBroker = allBrokersInCluster.size()
+                    val n = allBrokersInCluster.size()
                     close()
-                    nBroker
-                } `should be equal to` b
+                    n
+                } shouldEqualTo b
 
             }
 
             it("should not be any topics available") {
 
                 ZkUtils.apply(kEnv.serverPark.zookeeper.url, sessTimeout, connTimeout, false).run {
-                    val nTopics = allTopics.size()
+                    val n = allTopics.size()
                     close()
-                    nTopics
-                } `should be equal to` 0
+                    n
+                } shouldEqualTo 0
             }
 
             afterGroup {
@@ -154,26 +153,25 @@ object KBServerSpec : Spek({
 
             beforeGroup {
                 kEnv.serverPark.brokers.forEach { it.start() }
-
             }
 
             it("should have $b broker(s)") {
 
                 ZkUtils.apply(kEnv.serverPark.zookeeper.url, sessTimeout, connTimeout, false).run {
-                    val nBroker = allBrokersInCluster.size()
+                    val n = allBrokersInCluster.size()
                     close()
-                    nBroker
-                } `should be equal to` b
+                    n
+                } shouldEqualTo b
 
             }
 
             it("should not be any topics available") {
 
                 ZkUtils.apply(kEnv.serverPark.zookeeper.url, sessTimeout, connTimeout, false).run {
-                    val nTopics = allTopics.size()
+                    val n = allTopics.size()
                     close()
-                    nTopics
-                } `should be equal to` 0
+                    n
+                } shouldEqualTo 0
             }
 
             afterGroup {

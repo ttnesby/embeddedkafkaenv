@@ -32,26 +32,26 @@ object KafkaEnvironmentSpec : Spek({
                 FourLetterWordMain.send4LetterWord(
                         keDefault.serverPark.zookeeper.host,
                         keDefault.serverPark.zookeeper.port,
-                        "ruok") `should be equal to` "imok\n"
+                        "ruok") shouldBeEqualTo "imok\n"
 
             }
 
             it("should have $nBroker broker") {
 
                 ZkUtils.apply(keDefault.serverPark.zookeeper.url, sessTimeout, connTimeout, false).run {
-                    val nBroker = allBrokersInCluster.size()
+                    val n = allBrokersInCluster.size()
                     close()
-                    nBroker
-                } `should be equal to` nBroker
+                    n
+                } shouldEqualTo nBroker
             }
 
             it("should have $nTopics topics available") {
 
                 ZkUtils.apply(keDefault.serverPark.zookeeper.url, sessTimeout, connTimeout, false).run {
-                    val nBroker = allTopics.size()
+                    val n = allTopics.size()
                     close()
-                    nBroker
-                } `should be equal to` nTopics
+                    n
+                } shouldEqualTo nTopics
 
             }
 
@@ -77,26 +77,26 @@ object KafkaEnvironmentSpec : Spek({
                 FourLetterWordMain.send4LetterWord(
                         keBasic.serverPark.zookeeper.host,
                         keBasic.serverPark.zookeeper.port,
-                        "ruok") `should be equal to` "imok\n"
+                        "ruok") shouldBeEqualTo  "imok\n"
 
             }
 
             it("should have $nBroker broker") {
 
                 ZkUtils.apply(zku, sessTimeout, connTimeout, false).run {
-                    val nBroker = allBrokersInCluster.size()
+                    val n = allBrokersInCluster.size()
                     close()
-                    nBroker
-                } `should be equal to` nBroker
+                    n
+                } shouldEqualTo nBroker
             }
 
             it("should have ${basicTopics.size} topics available") {
 
                 ZkUtils.apply(zku, sessTimeout, connTimeout, false).run {
-                    val nBroker = allTopics.size()
+                    val n = allTopics.size()
                     close()
-                    nBroker
-                } `should be equal to` basicTopics.size
+                    n
+                } shouldEqualTo basicTopics.size
 
             }
 
@@ -109,7 +109,7 @@ object KafkaEnvironmentSpec : Spek({
                     topics.foreach { lTopics.add(it) }
                     close()
                     lTopics
-                } `should contain all` basicTopics
+                } shouldContainAll basicTopics
             }
 
             afterGroup {
@@ -133,17 +133,17 @@ object KafkaEnvironmentSpec : Spek({
                 FourLetterWordMain.send4LetterWord(
                         keStrange1.serverPark.zookeeper.host,
                         keStrange1.serverPark.zookeeper.port,
-                        "ruok") `should be equal to` "imok\n"
+                        "ruok") shouldBeEqualTo "imok\n"
 
             }
 
             it("should have $nBroker broker") {
 
                 ZkUtils.apply(zku, sessTimeout, connTimeout, false).run {
-                    val nBroker = allBrokersInCluster.size()
+                    val n = allBrokersInCluster.size()
                     close()
-                    nBroker
-                } `should be equal to` nBroker
+                    n
+                } shouldEqualTo nBroker
             }
 
             afterGroup {
@@ -171,27 +171,27 @@ object KafkaEnvironmentSpec : Spek({
                 FourLetterWordMain.send4LetterWord(
                         keStrange2.serverPark.zookeeper.host,
                         keStrange2.serverPark.zookeeper.port,
-                        "ruok") `should be equal to` "imok\n"
+                        "ruok") shouldBeEqualTo "imok\n"
 
             }
 
             it("should have $nBroker broker") {
 
                 ZkUtils.apply(zku, sessTimeout, connTimeout, false).run {
-                    val nBroker = allBrokersInCluster.size()
+                    val n = allBrokersInCluster.size()
                     close()
-                    nBroker
-                } `should be equal to` nBroker
+                    n
+                } shouldEqualTo nBroker
             }
 
             // +1 is due to schema registry topic for schemas
             it("should have ${strange2Topics.size + 1} topics available") {
 
                 ZkUtils.apply(zku, sessTimeout, connTimeout, false).run {
-                    val nBroker = allTopics.size()
+                    val n = allTopics.size()
                     close()
-                    nBroker
-                } `should be equal to` (strange2Topics.size + 1)
+                    n
+                } shouldEqualTo (strange2Topics.size + 1)
 
             }
 
@@ -204,7 +204,7 @@ object KafkaEnvironmentSpec : Spek({
                     topics.foreach { lTopics.add(it) }
                     close()
                     lTopics
-                } `should contain all` strange2Topics
+                } shouldContainAll strange2Topics
             }
 
             it("should have a schema registry") {
