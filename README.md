@@ -17,10 +17,8 @@ fun start() // start servers in correct order
  
 fun stop() // stop servers in correct order - session data are available
  
-fun tearDown() // when finished with the kafka environment, stops servers and remove session data
-                       
+fun tearDown() // when finished with the kafka environment, stops servers and remove session data                    
 ```
-
 
 ##Examples
 
@@ -61,7 +59,8 @@ Given topics are automatically created and all servers are started in correct or
 Each topic will have number of partitions equal to number of brokers.
 
 ## ServerPark
-An instance of KafkaEnvironment has a serverPark property, giving access to relevant details. 
+An instance of KafkaEnvironment has a serverPark (ServerPark) property, giving access to configured servers.
+Each server (ServerBase) has a few relevant properties and start/stop functions. 
 
 ```kotlin
     data class ServerPark(
@@ -69,7 +68,7 @@ An instance of KafkaEnvironment has a serverPark property, giving access to rele
             val brokers: List<ServerBase>,
             val schemaregistry: ServerBase,
             val rest: ServerBase)
-            
+    ...        
     abstract class ServerBase {
         protected var status: ServerStatus = NotRunning
     
@@ -80,6 +79,9 @@ An instance of KafkaEnvironment has a serverPark property, giving access to rele
         abstract fun start()
         abstract fun stop()
     }
+    ...
+    val brokersURL: String
 ``` 
-
+Thus, each server can be stopped and started independent of the kafka environment start/stop.
+In addition, a brokersURL property with all brokers, is available. 
 
