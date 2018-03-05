@@ -20,9 +20,8 @@ fun stop() // stop servers in correct order - session data are available
 fun tearDown() // when finished with the kafka environment, stops servers and remove session data                    
 ```
 
-##Examples
-
-###Default
+## Examples
+### Default
 ```kotlin
 val keDefault = KafkaEnvironment()
  
@@ -37,7 +36,7 @@ The default settings gives
 * 1 zookeeper
 * 1 broker
 
-###Enhanced
+### Enhanced
 ```kotlin
 val keEnhanced = KafkaEnvironment(
                     noOfBrokers = 3,
