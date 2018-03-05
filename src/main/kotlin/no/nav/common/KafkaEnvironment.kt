@@ -32,7 +32,7 @@ import java.util.*
  * A [brokersURL] property is available, expedient when multiple brokers
  *
 */
-class KafkaEnvironment(val noOfBrokers: Int = 1,
+class KafkaEnvironment(private val noOfBrokers: Int = 1,
                        val topics: List<String> = emptyList(),
                        withSchemaRegistry: Boolean = false,
                        withRest: Boolean = false,

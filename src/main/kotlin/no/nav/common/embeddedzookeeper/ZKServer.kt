@@ -1,7 +1,6 @@
 package no.nav.common.embeddedzookeeper
 
 import no.nav.common.embeddedutils.*
-import org.apache.commons.io.FileUtils
 import org.apache.zookeeper.server.ServerCnxnFactory
 import org.apache.zookeeper.server.ServerConfig
 import org.apache.zookeeper.server.ZooKeeperServer
@@ -32,7 +31,7 @@ class ZKServer(override val port: Int, private val dataDir: File) : ServerBase()
             maxSessionTimeout = config.maxSessionTimeout
         }
 
-        val cnxnFactory = ServerCnxnFactory.createFactory().apply {
+        val cnxnFactory: ServerCnxnFactory = ServerCnxnFactory.createFactory().apply {
             configure(config.clientPortAddress, config.maxClientCnxns)
         }
     }

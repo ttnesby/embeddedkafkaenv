@@ -3,7 +3,6 @@ package no.nav.common.embeddedschemaregistry
 import io.confluent.kafka.schemaregistry.rest.SchemaRegistryConfig
 import io.confluent.kafka.schemaregistry.rest.SchemaRegistryRestApplication
 import no.nav.common.embeddedutils.*
-import no.nav.common.embeddedzookeeper.ZKServer
 import java.util.*
 
 class SRServer(override val port: Int, private val zkURL: String) : ServerBase() {
@@ -14,7 +13,7 @@ class SRServer(override val port: Int, private val zkURL: String) : ServerBase()
     override val url = "http://$host:$port"
 
     // not possible to stop and restart schema registry at this level, use inner core class
-    private class SRS(port: Int, url: String, zkURL: String) {
+    private class SRS(url: String, zkURL: String) {
 
         val scServer = SchemaRegistryRestApplication(
                 Properties().apply {
@@ -29,7 +28,7 @@ class SRServer(override val port: Int, private val zkURL: String) : ServerBase()
 
     override fun start() = when (status) {
         NotRunning -> {
-            SRS(port, url, zkURL).apply {
+            SRS(url, zkURL).apply {
                 sr.add(this)
                 scServer.start()
             }

@@ -5,12 +5,9 @@ import kafka.server.KafkaConfig
 import kafka.server.KafkaServer
 import kafka.utils.VerifiableProperties
 import no.nav.common.embeddedutils.*
-import no.nav.common.embeddedzookeeper.ZKServer
-import org.apache.commons.io.FileUtils
 import org.apache.kafka.common.utils.Time
 import scala.Option
 import java.io.File
-import java.io.IOException
 import java.util.*
 
 class KBServer(
