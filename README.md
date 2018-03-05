@@ -84,4 +84,3 @@ Each server (ServerBase) has a few relevant properties and start/stop functions.
 ``` 
 Thus, each server can be stopped and started independent of the kafka environment start/stop.
 In addition, a brokersURL property with all brokers, is available. 
-

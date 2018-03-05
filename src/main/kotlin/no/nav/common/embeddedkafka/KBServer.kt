@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils
 import org.apache.kafka.common.utils.Time
 import scala.Option
 import java.io.File
+import java.io.IOException
 import java.util.*
 
 class KBServer(
@@ -47,7 +48,6 @@ class KBServer(
         Running -> {
             broker.shutdown()
             broker.awaitShutdown()
-
             status = NotRunning
         }
         else -> {}
