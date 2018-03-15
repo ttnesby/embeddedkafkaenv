@@ -75,12 +75,12 @@ class KBServer(
         set(KafkaConfig.DefaultReplicationFactorProp(), noPartitions)
         set(KafkaConfig.MinInSyncReplicasProp(), 1)
 
-        set(KafkaConfig.OffsetsTopicPartitionsProp(), noPartitions) //50
+        set(KafkaConfig.OffsetsTopicPartitionsProp(), 2*noPartitions) //50
         set(KafkaConfig.OffsetsTopicReplicationFactorProp(), noPartitions.toShort()) //3
 
-        set(KafkaConfig.TransactionsTopicPartitionsProp(), noPartitions) //50
+        set(KafkaConfig.TransactionsTopicPartitionsProp(), 2*noPartitions) //50
         set(KafkaConfig.TransactionsTopicReplicationFactorProp(), noPartitions.toShort()) //3
-        set(KafkaConfig.TransactionsTopicMinISRProp(), noPartitions)
+        set(KafkaConfig.TransactionsTopicMinISRProp(), 1)
 
         //set(KafkaConfig.RequestTimeoutMsProp(), 2_000)
         //set(KafkaConfig.ReplicaSocketTimeoutMsProp(), 2_000)

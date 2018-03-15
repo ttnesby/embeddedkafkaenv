@@ -1,5 +1,6 @@
 package no.nav.common
 
+import kafka.admin.AdminClient
 import kafka.admin.AdminUtils
 import kafka.admin.RackAwareMode
 import kafka.admin.TopicCommand
@@ -10,6 +11,8 @@ import no.nav.common.embeddedschemaregistry.SRServer
 import no.nav.common.embeddedutils.*
 import no.nav.common.embeddedzookeeper.ZKServer
 import org.apache.commons.io.FileUtils
+import org.apache.kafka.clients.admin.AdminClientConfig
+import org.apache.kafka.common.utils.Time
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -145,6 +148,9 @@ class KafkaEnvironment(private val noOfBrokers: Int = 1,
     // https://insight.io/github.com/apache/kafka/blob/1.0/core/src/main/scala/kafka/admin/AdminUtils.scala
 
     private fun createTopics(topics: List<String>) {
+
+        //TODO use this feature instead...
+        //val x = AdminClient.create(Properties().apply { set(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,brokersURL) })
 
         if (topicsCreated || topics.isEmpty()) return
 
